@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slides-source
+  namespace: kubernetes-home-slides
+
+data:
+  REPO_URL: "https://github.com/RobertoBochet/kubernetes-home-slides.git"
+  GIT_REF: "main"

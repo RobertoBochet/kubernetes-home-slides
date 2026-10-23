@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slides
+  namespace: kubernetes-home-slides
+  labels:
+    app.kubernetes.io/name: slides
+
+spec:
+  replicas: 1
+
+  strategy:
+    type: Recreate
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slides
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slides
+
+    spec:
+      initContainers:
+        - name: clone
+          image: alpine/git:2.54.0
+          workingDir: /repo
+          command:
+            - git
+            - clone
+            - --branch=$(GIT_REF)
+            - $(REPO_URL)
+            - .
+
+          env:
+            - name: HOME
+              value: /tmp
+          envFrom:
+            - configMapRef:
+                name: slides-source
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+
+          volumeMounts:
+            - name: repo
+              mountPath: /repo
+            - name: tmp
+              mountPath: /tmp
+
+        - name: build
+          image: oven/bun:1.4.3-debian
+          workingDir: /repo
+          command:
+            - sh
+            - -c
+            - |
+              bun install --frozen-lockfile && \
+              bun run build --out /site
+
+          env:
+            - name: HOME
+              value: /tmp
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+
+          volumeMounts:
+            - name: repo
+              mountPath: /repo
+            - name: site
+              mountPath: /site
+            - name: tmp
+              mountPath: /tmp
+
+      containers:
+        - name: server
+          image: svenstaro/miniserve:0.35.0-alpine
+          args:
+            - --spa
+            - --index
+            - index.html
+            - --port
+            - "8080"
+            - /site
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+
+          volumeMounts:
+            - name: site
+              mountPath: /site
+              readOnly: true
+
+      terminationGracePeriodSeconds: 0
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      volumes:
+        - name: repo
+          emptyDir: {}
+        - name: site
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

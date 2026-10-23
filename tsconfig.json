@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["DOM", "ESNext"],
+    "baseUrl": ".",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "types": ["vite/client", "node", "@slidev/types", "@slidev/types/client", "unplugin-icons/types/vue3"],
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@slidev/client": ["./types/slidev-client.ts"],
+      "@slidev/client/*": ["./types/slidev-client-subpath.ts"]
+    }
+  },
+  "include": [
+    "types/**/*.ts",
+    "components/**/*.vue",
+    "components/**/*.d.ts",
+    "layouts/**/*.vue",
+    "setup/**/*.ts",
+    "styles/**/*.ts",
+    "uno.config.ts",
+    "vite.config.ts"
+  ]
+}

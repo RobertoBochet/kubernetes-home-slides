@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slides
+  namespace: kubernetes-home-slides
+
+spec:
+  selector:
+    app.kubernetes.io/name: slides
+
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

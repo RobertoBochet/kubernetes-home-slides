@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: slides
+  namespace: kubernetes-home-slides
+
+spec:
+  parentRefs:
+    - name: public
+      namespace: gateway
+
+  hostnames:
+    - kubernetes-home-slides.example.org
+
+  rules:
+    - backendRefs:
+        - name: slides
+          port: 80

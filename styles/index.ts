@@ -1,0 +1,6 @@
+import "@slidev/client/styles/layouts-base.css"
+import "@fontsource/nunito-sans/400.css"
+import "@fontsource/nunito-sans/600.css"
+import "@fontsource/nunito-sans/700.css"
+import "@fontsource/fira-code/400.css"
+import "./layout.css"
